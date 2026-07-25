@@ -1,11 +1,13 @@
 from flask import Flask
 
-from app.routes import main
 from app.database.db import db
+from app.database.seed import seed_database
 from app.config.logging_config import logger
 
-# Import models so SQLAlchemy knows about them
 from app.models.user import User
+
+from app.routes.main import main
+from app.routes.auth import auth
 
 
 def create_app():
@@ -18,8 +20,10 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        seed_database()
 
     app.register_blueprint(main)
+    app.register_blueprint(auth)
 
     logger.info("DemoShop application started.")
 
