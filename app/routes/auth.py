@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from app.models.user import User
 from app.utils.security import verify_password
+from app.utils.jwt_handler import generate_token
 from app.config.logging_config import logger
 
 auth = Blueprint("auth", __name__)
@@ -53,13 +54,18 @@ def login():
             }
         ), 401
 
+    token = generate_token(user)
+
     logger.info(f"User '{username}' logged in successfully.")
 
     return jsonify(
         {
             "success": True,
             "message": "Login successful.",
-            "username": user.username,
-            "role": user.role
+            "token": token,
+            "user": {
+                "username": user.username,
+                "role": user.role
+            }
         }
     )
