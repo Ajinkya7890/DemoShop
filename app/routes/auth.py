@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from app.models.user import User
 from app.utils.security import verify_password
 from app.utils.jwt_handler import generate_token
+from app.utils.auth_decorator import token_required
 from app.config.logging_config import logger
 
 auth = Blueprint("auth", __name__)
@@ -66,6 +67,20 @@ def login():
             "user": {
                 "username": user.username,
                 "role": user.role
+            }
+        }
+    )
+
+
+@auth.route("/profile", methods=["GET"])
+@token_required
+def profile(payload):
+    return jsonify(
+        {
+            "success": True,
+            "user": {
+                "username": payload["username"],
+                "role": payload["role"]
             }
         }
     )
