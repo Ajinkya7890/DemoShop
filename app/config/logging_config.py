@@ -1,23 +1,32 @@
 import logging
 import os
 
-LOG_DIRECTORY = "logs"
-LOG_FILE = os.path.join(LOG_DIRECTORY, "application.log")
+LOG_FOLDER = "logs"
+LOG_FILE = os.path.join(LOG_FOLDER, "demoshop.log")
 
-os.makedirs(LOG_DIRECTORY, exist_ok=True)
-
+# Global logger that other modules can import
 logger = logging.getLogger("DemoShop")
 
-logger.setLevel(logging.INFO)
 
-if not logger.handlers:
+def configure_logging():
 
-    file_handler = logging.FileHandler(LOG_FILE)
+    os.makedirs(LOG_FOLDER, exist_ok=True)
+
+    logger.setLevel(logging.INFO)
+
+    # Prevent duplicate handlers if app reloads
+    if logger.handlers:
+        return
 
     formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(message)s"
+        "%(asctime)s %(levelname)s %(message)s"
     )
 
+    file_handler = logging.FileHandler(LOG_FILE)
     file_handler.setFormatter(formatter)
 
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+
     logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
