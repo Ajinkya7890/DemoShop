@@ -1,9 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
 
 from app.database.db import db
 from app.models.order import Order
 from app.models.product import Product
 from app.utils.auth_decorator import token_required
+from app.utils.logger import log_event
 
 orders = Blueprint("orders", __name__)
 
@@ -63,6 +64,15 @@ def place_order(payload):
     product = Product.query.get(product_id)
 
     if product is None:
+
+        log_event(
+            "ORDER_FAILED",
+            request_id=g.request_id,
+            reason="PRODUCT_NOT_FOUND",
+            product_id=product_id,
+            ordered_by=payload["username"]
+        )
+
         return jsonify(
             {
                 "success": False,
@@ -71,6 +81,16 @@ def place_order(payload):
         ), 404
 
     if quantity <= 0:
+
+        log_event(
+            "ORDER_FAILED",
+            request_id=g.request_id,
+            reason="INVALID_QUANTITY",
+            product_id=product.id,
+            quantity=quantity,
+            ordered_by=payload["username"]
+        )
+
         return jsonify(
             {
                 "success": False,
@@ -79,6 +99,17 @@ def place_order(payload):
         ), 400
 
     if product.stock < quantity:
+
+        log_event(
+            "ORDER_FAILED",
+            request_id=g.request_id,
+            reason="INSUFFICIENT_STOCK",
+            product_id=product.id,
+            requested_quantity=quantity,
+            available_stock=product.stock,
+            ordered_by=payload["username"]
+        )
+
         return jsonify(
             {
                 "success": False,
@@ -99,6 +130,16 @@ def place_order(payload):
 
     db.session.add(order)
     db.session.commit()
+
+    log_event(
+        "ORDER_PLACED",
+        request_id=g.request_id,
+        order_id=order.id,
+        product_id=product.id,
+        quantity=quantity,
+        total_amount=total_amount,
+        ordered_by=payload["username"]
+    )
 
     return jsonify(
         {

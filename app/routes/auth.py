@@ -1,10 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
 
 from app.models.user import User
 from app.utils.security import verify_password
 from app.utils.jwt_handler import generate_token
 from app.utils.auth_decorator import token_required
-from app.config.logging_config import logger
+from app.utils.logger import log_event
 
 auth = Blueprint("auth", __name__)
 
@@ -36,7 +36,14 @@ def login():
     user = User.query.filter_by(username=username).first()
 
     if user is None:
-        logger.warning(f"Login failed: Unknown username '{username}'")
+
+        log_event(
+            "USER_LOGIN_FAILED",
+            request_id=g.request_id,
+            username=username,
+            reason="USER_NOT_FOUND",
+            ip=request.remote_addr
+        )
 
         return jsonify(
             {
@@ -46,7 +53,14 @@ def login():
         ), 404
 
     if not verify_password(user.password, password):
-        logger.warning(f"Login failed: Invalid password for '{username}'")
+
+        log_event(
+            "USER_LOGIN_FAILED",
+            request_id=g.request_id,
+            username=username,
+            reason="INVALID_PASSWORD",
+            ip=request.remote_addr
+        )
 
         return jsonify(
             {
@@ -57,7 +71,13 @@ def login():
 
     token = generate_token(user)
 
-    logger.info(f"User '{username}' logged in successfully.")
+    log_event(
+        "USER_LOGIN_SUCCESS",
+        request_id=g.request_id,
+        username=user.username,
+        role=user.role,
+        ip=request.remote_addr
+    )
 
     return jsonify(
         {

@@ -1,31 +1,30 @@
 from flask import Blueprint, jsonify
 
-from app.config.logging_config import logger
-
 main = Blueprint("main", __name__)
 
 
-@main.route("/", methods=["GET"])
+@main.route("/")
 def home():
 
-    logger.info("Home endpoint accessed.")
-
     return jsonify(
         {
-            "application": "DemoShop",
-            "status": "Running"
+            "success": True,
+            "message": "Welcome to DemoShop API!"
         }
     )
 
 
-@main.route("/health", methods=["GET"])
+@main.route("/health")
 def health():
 
-    logger.info("Health endpoint accessed.")
-
     return jsonify(
         {
-            "status": "UP",
-            "application": "DemoShop"
+            "success": True,
+            "status": "healthy"
         }
     )
+
+
+@main.route("/test-error")
+def test_error():
+    raise Exception("DemoShop Test Exception")

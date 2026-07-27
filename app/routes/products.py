@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, g
 
 from app.database.db import db
 from app.models.product import Product
 from app.utils.auth_decorator import token_required
+from app.utils.logger import log_event
 
 products = Blueprint("products", __name__)
 
@@ -66,6 +67,14 @@ def add_product(payload):
     db.session.add(product)
     db.session.commit()
 
+    log_event(
+        "PRODUCT_CREATED",
+        request_id=g.request_id,
+        product_id=product.id,
+        name=product.name,
+        created_by=payload["username"]
+    )
+
     return jsonify(
         {
             "success": True,
@@ -106,6 +115,13 @@ def update_product(payload, product_id):
 
     db.session.commit()
 
+    log_event(
+        "PRODUCT_UPDATED",
+        request_id=g.request_id,
+        product_id=product.id,
+        updated_by=payload["username"]
+    )
+
     return jsonify(
         {
             "success": True,
@@ -129,8 +145,19 @@ def delete_product(payload, product_id):
             }
         ), 404
 
+    deleted_product_id = product.id
+    deleted_product_name = product.name
+
     db.session.delete(product)
     db.session.commit()
+
+    log_event(
+        "PRODUCT_DELETED",
+        request_id=g.request_id,
+        product_id=deleted_product_id,
+        name=deleted_product_name,
+        deleted_by=payload["username"]
+    )
 
     return jsonify(
         {

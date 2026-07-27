@@ -1,8 +1,9 @@
 from functools import wraps
 
-from flask import request, jsonify
+from flask import request, jsonify, g
 
 from app.utils.jwt_handler import verify_token
+from app.utils.logger import log_event
 
 
 def token_required(f):
@@ -12,6 +13,16 @@ def token_required(f):
         auth_header = request.headers.get("Authorization")
 
         if not auth_header:
+
+            log_event(
+                "UNAUTHORIZED_ACCESS",
+                request_id=getattr(g, "request_id", None),
+                reason="MISSING_TOKEN",
+                endpoint=request.path,
+                method=request.method,
+                ip=request.remote_addr
+            )
+
             return jsonify(
                 {
                     "success": False,
@@ -20,6 +31,16 @@ def token_required(f):
             ), 401
 
         if not auth_header.startswith("Bearer "):
+
+            log_event(
+                "UNAUTHORIZED_ACCESS",
+                request_id=getattr(g, "request_id", None),
+                reason="INVALID_AUTH_FORMAT",
+                endpoint=request.path,
+                method=request.method,
+                ip=request.remote_addr
+            )
+
             return jsonify(
                 {
                     "success": False,
@@ -32,6 +53,16 @@ def token_required(f):
         payload = verify_token(token)
 
         if payload is None:
+
+            log_event(
+                "UNAUTHORIZED_ACCESS",
+                request_id=getattr(g, "request_id", None),
+                reason="INVALID_OR_EXPIRED_TOKEN",
+                endpoint=request.path,
+                method=request.method,
+                ip=request.remote_addr
+            )
+
             return jsonify(
                 {
                     "success": False,
