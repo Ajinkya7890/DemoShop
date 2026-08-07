@@ -383,18 +383,36 @@ function App() {
   return (
     <div className="app-shell">
       <header className="hero">
-        <div>
+        <div className="hero-main">
           <p className="eyebrow">DemoShop x LogSherlock</p>
-          <h1>Event-driven test UI for the existing Flask backend</h1>
+          <h1>Shop, test, and watch every event unfold.</h1>
           <p className="hero-copy">
-            This interface only calls the current DemoShop APIs and surfaces the resulting log-worthy
-            events in a compact activity feed.
+            This storefront keeps the existing Flask routes and log events intact while presenting the same flows in a calmer, more realistic ecommerce experience.
           </p>
+
+          <div className="hero-actions">
+            <a className="primary-button hero-link" href="#/products">
+              Browse products
+            </a>
+            <a className="secondary-button hero-link" href="#/orders">
+              Place an order
+            </a>
+          </div>
         </div>
 
-        <div className="status-pill">
-          <span className="status-dot" />
-          <span>Session: {currentUserLabel}</span>
+        <div className="hero-panel">
+          <div className="hero-panel-row">
+            <span className="hero-panel-label">Session</span>
+            <strong>{currentUserLabel}</strong>
+          </div>
+          <div className="hero-panel-row">
+            <span className="hero-panel-label">Inventory</span>
+            <strong>{products.length} active products</strong>
+          </div>
+          <div className="hero-panel-row">
+            <span className="hero-panel-label">Orders</span>
+            <strong>{orders.length} recent orders</strong>
+          </div>
         </div>
       </header>
 
@@ -422,136 +440,168 @@ function App() {
       <main className="workspace">
         <section className="primary-column">
           {activePage === 'login' && (
-            <PageCard
-              title="Login page"
-              description="Use the existing /login route to generate success and failure logs."
-              actions={
-                <button className="secondary-button" type="button" onClick={() => void refreshProfile(token)}>
-                  Check profile
-                </button>
-              }
-            >
-              <form className="form-grid" onSubmit={handleLoginSubmit}>
-                <Field label="Username">
-                  <input
-                    value={loginForm.username}
-                    onChange={(event) => setLoginForm({ ...loginForm, username: event.target.value })}
-                    placeholder="admin"
-                  />
-                </Field>
-
-                <Field label="Password">
-                  <input
-                    type="password"
-                    value={loginForm.password}
-                    onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })}
-                    placeholder="admin123"
-                  />
-                </Field>
-
-                <div className="action-row full-span">
-                  <button className="primary-button" type="submit" disabled={loading.login}>
-                    {loading.login ? 'Logging in...' : 'Login'}
+            <>
+              <PageCard
+                title="Welcome back"
+                description="Authenticate with the existing login route and let the activity feed document the result."
+                actions={
+                  <button className="secondary-button" type="button" onClick={() => void refreshProfile(token)}>
+                    Check profile
                   </button>
-                  <button
-                    className="ghost-button"
-                    type="button"
-                    onClick={() => setLoginForm(initialLoginForm)}
-                  >
-                    Reset
-                  </button>
-                </div>
-              </form>
-            </PageCard>
+                }
+              >
+                <form className="form-grid" onSubmit={handleLoginSubmit}>
+                  <Field label="Username">
+                    <input
+                      value={loginForm.username}
+                      onChange={(event) => setLoginForm({ ...loginForm, username: event.target.value })}
+                      placeholder="admin"
+                    />
+                  </Field>
+
+                  <Field label="Password">
+                    <input
+                      type="password"
+                      value={loginForm.password}
+                      onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })}
+                      placeholder="admin123"
+                    />
+                  </Field>
+
+                  <div className="action-row full-span">
+                    <button className="primary-button" type="submit" disabled={loading.login}>
+                      {loading.login ? 'Logging in...' : 'Login'}
+                    </button>
+                    <button
+                      className="ghost-button"
+                      type="button"
+                      onClick={() => setLoginForm(initialLoginForm)}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </form>
+              </PageCard>
+
+              <div className="feature-grid">
+                <article className="feature-card">
+                  <p className="eyebrow">Quick start</p>
+                  <h3>Use the seeded admin account</h3>
+                  <p>Username admin and password admin123 still trigger the same backend login flow.</p>
+                </article>
+                <article className="feature-card">
+                  <p className="eyebrow">Protected flow</p>
+                  <h3>Profile checks remain secured by the token guard</h3>
+                  <p>The same bearer-token route powers the experience, now framed as a secure checkout journey.</p>
+                </article>
+              </div>
+            </>
           )}
 
           {activePage === 'products' && (
-            <PageCard
-              title="Product page"
-              description="Create, update, and delete products using the existing product APIs only."
-              actions={
-                <button className="secondary-button" type="button" onClick={() => void refreshProducts()}>
-                  Refresh products
-                </button>
-              }
-            >
-              <form className="form-grid">
-                <Field label="Product ID">
-                  <input
-                    value={productForm.id}
-                    onChange={(event) => setProductForm({ ...productForm, id: event.target.value })}
-                    placeholder="1"
-                  />
-                </Field>
-
-                <Field label="Name">
-                  <input
-                    value={productForm.name}
-                    onChange={(event) => setProductForm({ ...productForm, name: event.target.value })}
-                    placeholder="Demo Product"
-                  />
-                </Field>
-
-                <Field label="Description" className="full-span">
-                  <textarea
-                    rows={4}
-                    value={productForm.description}
-                    onChange={(event) => setProductForm({ ...productForm, description: event.target.value })}
-                    placeholder="Short description of the product"
-                  />
-                </Field>
-
-                <Field label="Price">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={productForm.price}
-                    onChange={(event) => setProductForm({ ...productForm, price: event.target.value })}
-                    placeholder="19.99"
-                  />
-                </Field>
-
-                <Field label="Stock">
-                  <input
-                    type="number"
-                    min="0"
-                    value={productForm.stock}
-                    onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })}
-                    placeholder="10"
-                  />
-                </Field>
-
-                <div className="action-row full-span">
-                  <button className="primary-button" type="button" onClick={() => void handleCreateProduct()}>
-                    Create product
+            <>
+              <PageCard
+                title="Catalog manager"
+                description="Create, update, and review products in a cleaner storefront layout while keeping the backend API unchanged."
+                actions={
+                  <button className="secondary-button" type="button" onClick={() => void refreshProducts()}>
+                    Refresh products
                   </button>
-                  <button className="secondary-button" type="button" onClick={() => void handleUpdateProduct()}>
-                    Update product
-                  </button>
-                  <button className="danger-button" type="button" onClick={() => void handleDeleteProduct()}>
-                    Delete product
-                  </button>
+                }
+              >
+                <div className="mini-stats">
+                  <div className="mini-stat">
+                    <span>Featured</span>
+                    <strong>{products[0] ? products[0].name : 'No item yet'}</strong>
+                  </div>
+                  <div className="mini-stat">
+                    <span>Stock focus</span>
+                    <strong>{products.reduce((sum, product) => sum + Number(product.stock || 0), 0)} units</strong>
+                  </div>
                 </div>
-              </form>
+
+                <form className="form-grid">
+                  <Field label="Product ID">
+                    <input
+                      value={productForm.id}
+                      onChange={(event) => setProductForm({ ...productForm, id: event.target.value })}
+                      placeholder="1"
+                    />
+                  </Field>
+
+                  <Field label="Name">
+                    <input
+                      value={productForm.name}
+                      onChange={(event) => setProductForm({ ...productForm, name: event.target.value })}
+                      placeholder="Demo Product"
+                    />
+                  </Field>
+
+                  <Field label="Description" className="full-span">
+                    <textarea
+                      rows={4}
+                      value={productForm.description}
+                      onChange={(event) => setProductForm({ ...productForm, description: event.target.value })}
+                      placeholder="Short description of the product"
+                    />
+                  </Field>
+
+                  <Field label="Price">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={productForm.price}
+                      onChange={(event) => setProductForm({ ...productForm, price: event.target.value })}
+                      placeholder="19.99"
+                    />
+                  </Field>
+
+                  <Field label="Stock">
+                    <input
+                      type="number"
+                      min="0"
+                      value={productForm.stock}
+                      onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })}
+                      placeholder="10"
+                    />
+                  </Field>
+
+                  <div className="action-row full-span">
+                    <button className="primary-button" type="button" onClick={() => void handleCreateProduct()}>
+                      Create product
+                    </button>
+                    <button className="secondary-button" type="button" onClick={() => void handleUpdateProduct()}>
+                      Update product
+                    </button>
+                    <button className="danger-button" type="button" onClick={() => void handleDeleteProduct()}>
+                      Delete product
+                    </button>
+                  </div>
+                </form>
+              </PageCard>
 
               <div className="subsection">
                 <div className="subsection-heading">
-                  <h3>Existing products</h3>
-                  <span>{loading.products ? 'Loading...' : `${products.length} products`}</span>
+                  <h3>Trending items</h3>
+                  <span>{loading.products ? 'Loading...' : `${products.length} items available`}</span>
                 </div>
 
-                <div className="item-list">
+                <div className="product-grid">
                   {products.map((product) => (
-                    <article key={product.id} className="item-card">
-                      <div>
-                        <strong>{product.name}</strong>
-                        <p>{product.description}</p>
+                    <article key={product.id} className="product-card">
+                      <div className="product-card-top">
+                        <div>
+                          <span className="product-chip">In stock · {product.stock}</span>
+                          <strong>{product.name}</strong>
+                        </div>
+                        <span className="price-badge">${Number(product.price).toFixed(2)}</span>
                       </div>
 
-                      <div className="meta-line">
+                      <p>{product.description}</p>
+
+                      <div className="product-card-meta">
                         <span>#{product.id}</span>
-                        <span>${Number(product.price).toFixed(2)}</span>
                         <span>Stock {product.stock}</span>
                       </div>
 
@@ -567,58 +617,71 @@ function App() {
                   ))}
                 </div>
               </div>
-            </PageCard>
+            </>
           )}
 
           {activePage === 'orders' && (
-            <PageCard
-              title="Order page"
-              description="Place orders with the existing POST /orders endpoint and use the failure path for the cancel test."
-              actions={
-                <button className="secondary-button" type="button" onClick={() => void refreshOrders()}>
-                  Refresh orders
-                </button>
-              }
-            >
-              <div className="callout">
-                The backend does not expose a cancel-order endpoint. The cancel button below intentionally uses the
-                existing invalid-order path so LogSherlock still receives a real backend event.
-              </div>
-
-              <form className="form-grid">
-                <Field label="Product">
-                  <select
-                    value={orderForm.productId}
-                    onChange={(event) => setOrderForm({ ...orderForm, productId: event.target.value })}
-                  >
-                    <option value="">Choose a product</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        #{product.id} {product.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label="Quantity">
-                  <input
-                    type="number"
-                    min="1"
-                    value={orderForm.quantity}
-                    onChange={(event) => setOrderForm({ ...orderForm, quantity: event.target.value })}
-                    placeholder="1"
-                  />
-                </Field>
-
-                <div className="action-row full-span">
-                  <button className="primary-button" type="button" onClick={() => void handlePlaceOrder()}>
-                    Place order
+            <>
+              <PageCard
+                title="Order center"
+                description="Place orders with the existing POST /orders endpoint and use the failure path for the cancel test."
+                actions={
+                  <button className="secondary-button" type="button" onClick={() => void refreshOrders()}>
+                    Refresh orders
                   </button>
-                  <button className="danger-button" type="button" onClick={() => void handleCancelOrder()}>
-                    Cancel order
-                  </button>
+                }
+              >
+                <div className="mini-stats">
+                  <div className="mini-stat">
+                    <span>Checkout</span>
+                    <strong>Fast order capture</strong>
+                  </div>
+                  <div className="mini-stat">
+                    <span>Failure path</span>
+                    <strong>Cancel uses the existing invalid-order flow</strong>
+                  </div>
                 </div>
-              </form>
+
+                <div className="callout">
+                  The backend does not expose a cancel-order endpoint. The cancel button below intentionally uses the
+                  existing invalid-order path so LogSherlock still receives a real backend event.
+                </div>
+
+                <form className="form-grid">
+                  <Field label="Product">
+                    <select
+                      value={orderForm.productId}
+                      onChange={(event) => setOrderForm({ ...orderForm, productId: event.target.value })}
+                    >
+                      <option value="">Choose a product</option>
+                      {products.map((product) => (
+                        <option key={product.id} value={product.id}>
+                          #{product.id} {product.name}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <Field label="Quantity">
+                    <input
+                      type="number"
+                      min="1"
+                      value={orderForm.quantity}
+                      onChange={(event) => setOrderForm({ ...orderForm, quantity: event.target.value })}
+                      placeholder="1"
+                    />
+                  </Field>
+
+                  <div className="action-row full-span">
+                    <button className="primary-button" type="button" onClick={() => void handlePlaceOrder()}>
+                      Place order
+                    </button>
+                    <button className="danger-button" type="button" onClick={() => void handleCancelOrder()}>
+                      Cancel order
+                    </button>
+                  </div>
+                </form>
+              </PageCard>
 
               <div className="subsection">
                 <div className="subsection-heading">
@@ -626,24 +689,30 @@ function App() {
                   <span>{loading.orders ? 'Loading...' : `${orders.length} orders`}</span>
                 </div>
 
-                <div className="item-list">
+                <div className="product-grid">
                   {orders.map((order) => (
-                    <article key={order.id} className="item-card">
-                      <div>
-                        <strong>Order #{order.id}</strong>
-                        <p>
-                          Product {order.product_id} by {order.username}
-                        </p>
+                    <article key={order.id} className="product-card">
+                      <div className="product-card-top">
+                        <div>
+                          <span className="product-chip">{order.status}</span>
+                          <strong>Order #{order.id}</strong>
+                        </div>
+                        <span className="price-badge">${Number(order.total_amount).toFixed(2)}</span>
                       </div>
 
-                      <div className="meta-line">
+                      <p>Product {order.product_id} by {order.username}</p>
+
+                      <div className="product-card-meta">
                         <span>Qty {order.quantity}</span>
-                        <span>${Number(order.total_amount).toFixed(2)}</span>
-                        <span>{order.status}</span>
+                        <span>{order.username}</span>
                       </div>
 
                       <div className="action-row compact">
-                        <button className="ghost-button" type="button" onClick={() => setOrderForm({ ...orderForm, productId: String(order.product_id) })}>
+                        <button
+                          className="ghost-button"
+                          type="button"
+                          onClick={() => setOrderForm({ ...orderForm, productId: String(order.product_id) })}
+                        >
                           Reuse product
                         </button>
                       </div>
@@ -651,12 +720,12 @@ function App() {
                   ))}
                 </div>
               </div>
-            </PageCard>
+            </>
           )}
 
           {activePage === 'security' && (
             <PageCard
-              title="Security page"
+              title="Security checks"
               description="Trigger unauthorized access with the protected profile route and missing credentials."
               actions={
                 <button className="secondary-button" type="button" onClick={() => void triggerUnauthorizedAccess()}>
@@ -666,6 +735,19 @@ function App() {
             >
               <div className="callout warning">
                 The protected /profile endpoint logs UNAUTHORIZED_ACCESS when the bearer token is missing or invalid.
+              </div>
+
+              <div className="feature-grid">
+                <article className="feature-card">
+                  <p className="eyebrow">Protected route</p>
+                  <h3>Missing token</h3>
+                  <p>Requests to /profile are rejected without a bearer token, producing an unauthorized event.</p>
+                </article>
+                <article className="feature-card">
+                  <p className="eyebrow">Validation</p>
+                  <h3>Invalid token</h3>
+                  <p>Try an invalid value to see the same error path handled in the UI.</p>
+                </article>
               </div>
 
               <div className="button-cluster">
@@ -688,7 +770,7 @@ function App() {
 
           {activePage === 'system' && (
             <PageCard
-              title="System page"
+              title="System diagnostics"
               description="Check health and exercise the existing backend error flow. APPLICATION_STARTED and APPLICATION_STOPPED are emitted by the Flask process itself."
               actions={
                 <button className="secondary-button" type="button" onClick={() => void checkSystemHealth()}>
@@ -700,6 +782,19 @@ function App() {
                 DemoShop emits APPLICATION_STARTED when the backend process launches and APPLICATION_STOPPED when it
                 exits. The UI cannot force those lifecycle hooks without changing the backend, so the buttons below
                 stick to the existing HTTP routes.
+              </div>
+
+              <div className="feature-grid">
+                <article className="feature-card">
+                  <p className="eyebrow">Status</p>
+                  <h3>Health route</h3>
+                  <p>The /health route confirms the backend is reachable without changing the Flask service.</p>
+                </article>
+                <article className="feature-card">
+                  <p className="eyebrow">Failure flow</p>
+                  <h3>Test error route</h3>
+                  <p>The /test-error route intentionally triggers the backend error flow for observation.</p>
+                </article>
               </div>
 
               <div className="button-cluster">
@@ -720,7 +815,7 @@ function App() {
         </section>
 
         <aside className="secondary-column">
-          <PageCard title="Activity panel" description="Latest generated events and test actions from this session.">
+          <PageCard title="Live activity" description="Latest generated events and test actions from this session.">
             <div className="activity-list">
               {activity.length === 0 ? (
                 <div className="empty-state">
@@ -746,7 +841,7 @@ function App() {
             </div>
           </PageCard>
 
-          <PageCard title="Connection notes" description="How this UI talks to the existing backend.">
+          <PageCard title="How it works" description="How this UI talks to the existing backend.">
             <ul className="note-list">
               <li>Uses the current Flask routes only.</li>
               <li>Stores the login token locally for protected calls.</li>
