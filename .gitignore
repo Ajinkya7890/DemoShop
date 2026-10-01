@@ -8,7 +8,7 @@ logs/
 *.log
 
 # Database
-database/
+
 *.db
 
 # Environment
