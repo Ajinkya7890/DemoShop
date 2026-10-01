@@ -16,3 +16,4 @@ logs/
 
 # VS Code
 .vscode/
+frontend/node_modules/
