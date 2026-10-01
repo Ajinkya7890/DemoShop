@@ -3,6 +3,7 @@ import time
 import uuid
 
 from flask import Flask, jsonify, request, g
+from flask_cors import CORS
 
 from app.config.database import configure_database
 from app.config.logging_config import configure_logging
@@ -25,6 +26,8 @@ from app.utils.logger import log_event
 def create_app():
 
     app = Flask(__name__)
+
+    CORS(app)
 
     configure_logging()
     configure_database(app)
