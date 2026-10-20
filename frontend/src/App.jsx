@@ -45,6 +45,7 @@ function App() {
   const [productForm, setProductForm] = useState(initialProductForm);
   const [orderForm, setOrderForm] = useState(initialOrderForm);
   const [loading, setLoading] = useState({ login: false, products: false, orders: false });
+  const [resourceHealth, setResourceHealth] = useState(null);
 
   useEffect(() => {
     const handleHashChange = () => setActivePage(getPageFromHash());
@@ -61,6 +62,13 @@ function App() {
   useEffect(() => {
     void refreshProducts();
     void refreshOrders();
+    void refreshResourceHealth();
+
+    const intervalId = window.setInterval(() => {
+      void refreshResourceHealth();
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -171,6 +179,22 @@ function App() {
       addNotification('error', 'Orders unavailable', error.message);
     } finally {
       setLoading((current) => ({ ...current, orders: false }));
+    }
+  }
+
+  async function refreshResourceHealth() {
+    try {
+      const payload = await apiRequest('/resource-health', { token: '' });
+      setResourceHealth(payload);
+      return payload;
+    } catch {
+      setResourceHealth({
+        monitoring_available: false,
+        overall_status: 'UNKNOWN',
+        customer_message: 'Resource monitoring is temporarily unavailable.',
+        message: 'Resource monitoring is temporarily unavailable.'
+      });
+      return null;
     }
   }
 
@@ -305,6 +329,7 @@ function App() {
     } catch (error) {
       addActivity('ORDER_FAILED', error.message, 'error');
       addNotification('error', 'Order failed', error.message);
+      void refreshResourceHealth();
     }
   }
 
@@ -382,6 +407,8 @@ function App() {
 
   return (
     <div className="app-shell">
+      <ResourceBanner health={resourceHealth} />
+
       <header className="hero">
         <div className="hero-main">
           <p className="eyebrow">DemoShop x LogSherlock</p>
@@ -673,8 +700,15 @@ function App() {
                   </Field>
 
                   <div className="action-row full-span">
-                    <button className="primary-button" type="button" onClick={() => void handlePlaceOrder()}>
-                      Place order
+                    <button
+                      className="primary-button"
+                      type="button"
+                      onClick={() => void handlePlaceOrder()}
+                      disabled={resourceHealth?.overall_status === 'CRITICAL'}
+                      title={resourceHealth?.overall_status === 'CRITICAL' ? 'Ordering is temporarily restricted due to resource pressure' : undefined}
+                      id="place-order-button"
+                    >
+                      {resourceHealth?.overall_status === 'CRITICAL' ? 'Ordering restricted' : 'Place order'}
                     </button>
                     <button className="danger-button" type="button" onClick={() => void handleCancelOrder()}>
                       Cancel order
@@ -906,6 +940,48 @@ function StatusTile({ label, value, tone }) {
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
+  );
+}
+
+
+function ResourceBanner({ health }) {
+  if (!health || health.overall_status === 'NORMAL') {
+    return null;
+  }
+
+  const isCritical = health.overall_status === 'CRITICAL';
+  const isWarning = health.overall_status === 'WARNING';
+  const isUnknown = health.overall_status === 'UNKNOWN';
+
+  if (!isCritical && !isWarning && !isUnknown) {
+    return null;
+  }
+
+  const role = isCritical ? 'alert' : 'status';
+  const ariaLive = isCritical ? 'assertive' : 'polite';
+  const tone = isCritical ? 'critical' : isWarning ? 'warning' : 'unknown';
+  const label = isCritical ? 'Critical' : isWarning ? 'Warning' : 'Notice';
+
+  const defaultMessage = isCritical
+    ? 'Service Temporarily Restricted — Some operations are temporarily unavailable due to a system resource issue. Please try again shortly.'
+    : isWarning
+    ? 'Service Performance Warning — Some system resources are under pressure. DemoShop is monitoring the situation.'
+    : 'Resource monitoring is temporarily unavailable. DemoShop operations continue normally.';
+
+  const messageText = health.customer_message || defaultMessage;
+
+  return (
+    <aside
+      className={`resource-banner ${tone}`}
+      role={role}
+      aria-live={ariaLive}
+      id="resource-status-banner"
+    >
+      <div className="resource-banner-content">
+        <span className="resource-banner-badge">{label}</span>
+        <span className="resource-banner-text">{messageText}</span>
+      </div>
+    </aside>
   );
 }
 

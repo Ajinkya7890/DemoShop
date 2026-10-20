@@ -5,6 +5,7 @@ from app.models.order import Order
 from app.models.product import Product
 from app.utils.auth_decorator import token_required
 from app.utils.logger import log_event
+from app.utils.resource_guard import get_resource_health
 
 orders = Blueprint("orders", __name__)
 
@@ -116,6 +117,37 @@ def place_order(payload):
                 "message": "Insufficient stock."
             }
         ), 400
+
+    # Resource-aware service protection check
+    resource_health = get_resource_health()
+    if resource_health.get("overall_status") == "CRITICAL":
+        critical_resources = [
+            f"{r.get('resource_name', r.get('resource_type', 'resource'))} ({r.get('current_usage')}%)"
+            for r in resource_health.get("resources", [])
+            if r.get("status") == "CRITICAL"
+        ]
+        affected_resources = ", ".join(critical_resources) if critical_resources else "unspecified"
+
+        log_event(
+            "ORDER_FAILED",
+            request_id=g.request_id,
+            reason="RESOURCE_CRITICAL",
+            product_id=product.id,
+            quantity=quantity,
+            ordered_by=payload["username"],
+            affected_resources=affected_resources,
+        )
+
+        return jsonify(
+            {
+                "success": False,
+                "message": (
+                    "Service Temporarily Restricted — Some operations are "
+                    "temporarily unavailable due to a system resource issue. "
+                    "Please try again shortly."
+                ),
+            }
+        ), 503
 
     total_amount = product.price * quantity
 

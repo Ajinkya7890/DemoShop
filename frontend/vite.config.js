@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const apiTarget = 'http://127.0.0.1:5000';
-const proxyPaths = ['/login', '/profile', '/products', '/orders', '/health', '/test-error'];
+const proxyPaths = ['/login', '/profile', '/products', '/orders', '/health', '/test-error', '/resource-health'];
 
 export default defineConfig({
   plugins: [react()],

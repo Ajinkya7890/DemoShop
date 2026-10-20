@@ -569,6 +569,81 @@ button:disabled {
   line-height: 1.6;
 }
 
+.resource-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  transition: all 180ms ease;
+}
+
+.resource-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.resource-banner-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.resource-banner-text {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.resource-banner.critical {
+  background: linear-gradient(135deg, rgba(65, 14, 24, 0.95), rgba(32, 8, 14, 0.92));
+  border-color: rgba(251, 113, 133, 0.45);
+  box-shadow: 0 10px 35px rgba(251, 113, 133, 0.18);
+}
+
+.resource-banner.critical .resource-banner-badge {
+  background: rgba(251, 113, 133, 0.18);
+  color: var(--danger);
+  border: 1px solid rgba(251, 113, 133, 0.4);
+}
+
+.resource-banner.warning {
+  background: linear-gradient(135deg, rgba(58, 38, 7, 0.95), rgba(30, 20, 4, 0.92));
+  border-color: rgba(251, 191, 36, 0.45);
+  box-shadow: 0 10px 35px rgba(251, 191, 36, 0.15);
+}
+
+.resource-banner.warning .resource-banner-badge {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--warning);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.resource-banner.unknown {
+  background: linear-gradient(135deg, rgba(16, 26, 38, 0.88), rgba(9, 16, 24, 0.88));
+  border-color: rgba(166, 195, 230, 0.2);
+}
+
+.resource-banner.unknown .resource-banner-badge {
+  background: rgba(166, 195, 230, 0.12);
+  color: var(--muted);
+  border: 1px solid rgba(166, 195, 230, 0.25);
+}
+
 @media (max-width: 1080px) {
   .workspace {
     grid-template-columns: 1fr;
@@ -594,6 +669,20 @@ button:disabled {
   .page-card,
   .notification {
     border-radius: 20px;
+  }
+
+  .resource-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 16px;
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .resource-banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 
   .form-grid,
